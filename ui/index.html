@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Query</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input,
+        button {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .results {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Route Search</h1>
+        <label for="stopName">Stop Name:</label>
+        <input type="text" id="stopName" placeholder="Enter stop name">
+
+        <label for="routeShortName">Route Short Name:</label>
+        <input type="text" id="routeShortName" placeholder="Enter route short name">
+
+        <label for="tripHeadsign">Trip Headsign:</label>
+        <input type="text" id="tripHeadsign" placeholder="Enter trip headsign">
+
+        <label for="delayThreshold">Delay Threshold:</label>
+        <input type="number" id="delayThreshold" placeholder="Enter delay threshold">
+
+        <button onclick="submitQuery()">Search</button>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        function submitQuery() {
+            const stopName = document.getElementById('stopName').value;
+            const routeShortName = document.getElementById('routeShortName').value;
+            const tripHeadsign = document.getElementById('tripHeadsign').value;
+            const delayThreshold = document.getElementById('delayThreshold').value;
+
+            const queryData = {
+                stop_name: stopName,
+                route_short_name: routeShortName,
+                trip_headsign: tripHeadsign,
+                delay_threshold: parseInt(delayThreshold)
+            };
+
+            fetch('http://localhost:8080/route/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(queryData)
+            })
+                .then(response => response.json())
+                .then(data => displayResults(data['entities']))
+                .catch(error => console.error('Error:', error));
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = ''; // Clear previous results
+
+            if (Array.isArray(data) && data.length > 0) {
+                const table = document.createElement('table');
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Stop Name</th>
+                            <th>Stop Sequence</th>
+                            <th>Start Datetime</th>
+                            <th>Platform</th>
+                            <th>Arrival Delay</th>
+                            <th>Departure Delay</th>
+                            <th>Route Short Name</th>
+                            <th>Trip Headsign</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(item => `
+                            <tr>
+                                <td>${item.StopName}</td>
+                                <td>${item.StopSequence}</td>
+                                <td>${item.StartDatetime}</td>
+                                <td>${item.Platform || 'N/A'}</td>
+                                <td>${item.ArrivalDelay}</td>
+                                <td>${item.DepartureDelay}</td>
+                                <td>${item.RouteShortName}</td>
+                                <td>${item.TripHeadsign}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                `;
+                resultsDiv.appendChild(table);
+            } else {
+                resultsDiv.innerHTML = '<p>No results found.</p>';
+            }
+        }
+    </script>
+</body>
+
+</html>
