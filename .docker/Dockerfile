@@ -13,6 +13,6 @@ FROM debian:bullseye-slim
 COPY --from=builder /build/main /app/
 WORKDIR /app
 EXPOSE 8080
-# ENTRYPOINT ["/app/main"]
+ENTRYPOINT ["/app/main"]
 
 
