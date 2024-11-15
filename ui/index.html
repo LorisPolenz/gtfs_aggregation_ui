@@ -122,7 +122,8 @@
                 delay_threshold: parseInt(delayThreshold)
             };
 
-            fetch('http://localhost:8080/route/search', {
+
+            fetch(window.location.protocol + "//" + window.location.host + '/route/search', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
