@@ -11,6 +11,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -ldflags "-s -w" -o main .
 # copy to lean production image
 FROM debian:bullseye-slim
 COPY --from=builder /build/main /app/
+COPY --from=builder /build/ui/ /app/ui/
 WORKDIR /app
 EXPOSE 8080
 ENTRYPOINT ["/app/main"]
